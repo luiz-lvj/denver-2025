@@ -2,7 +2,7 @@ import { Tool } from "@langchain/core/tools";
 import { getWeather } from "./get-weather";
 import { secretNumber } from "./secret-number";
 import { sumNumbers } from "./sum-numbers";
-import { getBalance } from "./get-balance";
+import { getTokenBalance } from "./get-token-balance";
 import { webSearch } from "./web-search";
 
 // Define tool categories
@@ -62,15 +62,15 @@ export const registry: Registry = {
       examples: ["sum_numbers('5,3')", "sum_numbers('10.5,20.3')"]
     }
   },
-  get_balance: {
-    tool: getBalance,
+  get_token_balance: {
+    tool: getTokenBalance,
     metadata: {
       category: ToolCategory.ONCHAIN,
-      description: "Retrieve the user's asset balance from the Superchain by address or user ID",
-      usage: "get_balance(addressOrUserId: string)",
+      description: "Retrieve token balance for an address on a specific blockchain",
+      usage: "get_token_balance(input: string)",
       examples: [
-        "get_balance('0x1234abcd...')",
-        "get_balance('user1234')"
+        "get_token_balance('0x6B175474E89094C44Da98b954EedeAC495271d0F', '0x075e72a5eDf65F0A5f44699c7654C1a76941Ddc8', 'ethereum', 'mainnet')",
+        "get_token_balance('0xUSDC_CONTRACT', '0xUSER_WALLET', 'base', 'mainnet')",
       ],
     }
   },
