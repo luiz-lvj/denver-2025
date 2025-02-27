@@ -2,12 +2,16 @@ import { Tool } from "@langchain/core/tools";
 import { getWeather } from "./get-weather";
 import { secretNumber } from "./secret-number";
 import { sumNumbers } from "./sum-numbers";
+import { getBalance } from "./get-balance";
+import { webSearch } from "./web-search";
 
 // Define tool categories
 export enum ToolCategory {
   UTILITY = "utility",
   INFORMATION = "information",
   CALCULATION = "calculation",
+  ONCHAIN = "onchain",
+  WEB = "web",
 }
 
 // Tool metadata interface
@@ -56,6 +60,27 @@ export const registry: Registry = {
       description: "Add two numbers together",
       usage: "sum_numbers(input: 'number1,number2')",
       examples: ["sum_numbers('5,3')", "sum_numbers('10.5,20.3')"]
+    }
+  },
+  get_balance: {
+    tool: getBalance,
+    metadata: {
+      category: ToolCategory.ONCHAIN,
+      description: "Retrieve the user's asset balance from the Superchain by address or user ID",
+      usage: "get_balance(addressOrUserId: string)",
+      examples: [
+        "get_balance('0x1234abcd...')",
+        "get_balance('user1234')"
+      ],
+    }
+  },
+  web_search: {
+    tool: webSearch,
+    metadata: {
+      category: ToolCategory.WEB,
+      description: "Search the web for the latest results based on a given query",
+      usage: "web_search(query: string)",
+      examples: ["web_search('Who is the president of the United States?')"]
     }
   }
 };

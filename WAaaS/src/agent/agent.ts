@@ -64,6 +64,8 @@ Instructions:
 - Use tools appropriately based on user requests
 - For weather queries, use get_weather
 - For addition, use sum_numbers
+- For balance queries, use get_balance
+- For web search, use web_search
 - Be concise and helpful in your responses
 - If a tool fails, explain the issue and suggest correct format
 - Maintain conversation context using previous messages
@@ -118,8 +120,10 @@ export async function createAgentExecutor(sessionId: string) {
     "1. get_weather: Check current weather conditions for any location\n" +
     "2. secret_number: Reveal the secret number (it's always 42)\n" +
     "3. sum_numbers: Add two numbers together (input format: 'number1,number2')\n\n" +
+    "4. web_search: Search the web for the latest results based on a given query\n\n" +
     "When a user's request can be helped by these tools, use them appropriately. " +
     "For weather queries, use the get_weather tool. For addition, use sum_numbers. " +
+    "For web search, use web_search. " +
     "Be concise and helpful with your responses.\n\n";
 
   // const prompt = new PromptTemplate({
