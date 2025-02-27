@@ -1,6 +1,8 @@
 // src/tools/webSearchTool.ts
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { ToolCategory } from "../../registry/types";
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,8 +25,19 @@ export const webSearch = tool(
   },
   {
     name: "web_search",
-    description: "Search the web for the latest results based on a given query",
-    // Validates that the tool is called with a string (the query).
-    schema: z.string().describe("The search query string"),
+    description: "Search the web for the latest results based on a query",
+    schema: z.string().describe("The search query"),
   }
 );
+
+// Export metadata separately
+export const metadata = {
+  category: ToolCategory.WEB,
+  description: "Search the web for the latest results based on a given query",
+  usage: "web_search(query: string)",
+  examples: [
+    "web_search('Who is the president of the United States?')",
+    "web_search('latest news on AI development')",
+    "web_search('ethereum price')"
+  ],
+};

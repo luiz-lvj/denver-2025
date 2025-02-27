@@ -1,13 +1,8 @@
-// import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { ChatOpenAI } from "@langchain/openai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { HumanMessage } from "@langchain/core/messages";
-
-import { tools } from "../tools";
+import { tools, toolRegistry } from "../registry";
 import dotenv from "dotenv";
-import { getToolDescription } from "../tools/registry";
 
 dotenv.config();
 
@@ -37,7 +32,7 @@ export async function createAgent() {
   // Create agent configuration
   const agentConfig: AgentConfig = {
     configurable: {
-      thread_id: "simple-agent-chat",
+      thread_id: "ai-agent-v0",
     }
   };
 
@@ -58,7 +53,7 @@ export async function createAgent() {
 function getSystemPrompt(): string {
   return `You are a helpful AI assistant with access to several useful tools.
 
-${getToolDescription(true)}
+${toolRegistry.listTools(true)}
 
 Instructions:
 - Use tools appropriately based on user requests
@@ -83,7 +78,7 @@ Remember to think step-by-step about which tool to use for each request.`;
  */
 function validateEnvironment(): void {
   const missingVars: string[] = [];
-  const requiredVars = ["OPENAI_API_KEY"];
+  const requiredVars = ["OPENAI_API_KEY","TAVILY_API_KEY"];
   
   requiredVars.forEach(varName => {
     if (!process.env[varName]) {
@@ -119,41 +114,23 @@ export async function createAgentExecutor(sessionId: string) {
   // Store conversation history in memory
   const memory = new MemorySaver();
 
-  // Define the system prompt
+  // Create the React agent with system prompt
   const systemPrompt = 
     "You are a helpful AI assistant with access to several useful tools:\n\n" +
-    "1. get_weather: Check current weather conditions for any location\n" +
-    "2. secret_number: Reveal the secret number (it's always 42)\n" +
-    "3. sum_numbers: Add two numbers together (input format: 'number1,number2')\n\n" +
-    "4. web_search: Search the web for the latest results based on a given query\n\n" +
-    "5. get_token_balance: Retrieve a token balance for an address on a specific blockchain network\n\n" +
+    toolRegistry.listTools(false) +
     "When a user's request can be helped by these tools, use them appropriately. " +
     "For weather queries, use the get_weather tool. For addition, use sum_numbers. " +
     "For web search, use web_search. " +
     "For token balance queries, use get_token_balance. " +
     "Be concise and helpful with your responses.\n\n";
 
-  // const prompt = new PromptTemplate({
-  //   template: systemPrompt,
-  //   inputVariables: ["tools", "tool_names", "agent_scratchpad"],
-  // });
-
   // Create the React agent
   const agent = await createReactAgent({
     llm,
     tools,
-    // prompt,
     messageModifier: systemPrompt,
     checkpointSaver: memory,
   });
 
   return agent;
-
-  // Wrap the agent in an executor
-  // const agentExecutor = new AgentExecutor({
-  //   agent,
-  //   tools,
-  // });
-
-  // return agentExecutor;
 }

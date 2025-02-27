@@ -2,10 +2,11 @@
 
 import { tool } from "@langchain/core/tools";
 import { ethers } from "ethers";
-import { rpcEndpoints } from "./rpc";
 import { z } from "zod";
+import { rpcEndpoints } from "./rpc";
+import { ToolCategory } from "../../registry/types";
 
-// ABI for ERC20 token - only includes balanceOf function
+// ABI for ERC20 token
 const minimalERC20ABI = [
   {
     constant: true,
@@ -40,7 +41,7 @@ const TOKENS = {
  */
 export const getTokenBalance = tool(
   async (input: string) => {
-    console.log("input", input);
+    console.log("Input:", input);
     try {
       // Extract parameters from natural language or comma-separated format
       let tokenAddress, holderAddress, chain, network;
@@ -136,3 +137,14 @@ export const getTokenBalance = tool(
     schema: z.string().describe("Natural language description of the token (e.g., 'DAI'), holder address, blockchain (ethereum/base/mode), and network (mainnet/testnet)"),
   }
 );
+
+// Export metadata separately
+export const metadata = {
+  category: ToolCategory.ONCHAIN,
+  description: "Retrieve token balance for an address on a specific blockchain",
+  usage: "get_token_balance(input: string)",
+  examples: [
+    "get_token_balance('0x6B175474E89094C44Da98b954EedeAC495271d0F,0x075e72a5eDf65F0A5f44699c7654C1a76941Ddc8,ethereum,mainnet')",
+    "get_token_balance('Check my DAI balance on Ethereum mainnet, my wallet is 0x075e72a5eDf65F0A5f44699c7654C1a76941Ddc8')",
+  ],
+};
