@@ -1,0 +1,1 @@
+@othentic/=lib/core-contracts/src/
