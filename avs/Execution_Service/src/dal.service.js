@@ -1,6 +1,9 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
 const { ethers, AbiCoder } = require('ethers');
+const { SuperChainERC20BridgeAddress } = require('./constants');
+const { SuperChainEERC20BridgeAbi } = require('./abis/SuperChainERC20Bridge');
+const { relayERC20 } = require('./bridge.service');
 
 var pinataApiKey='';
 var pinataSecretApiKey='';
@@ -16,9 +19,35 @@ function init() {
   privateKey = process.env.PRIVATE_KEY_PERFORMER;
 }
 
+
+function listenToEvents(wssUrl) {
+  console.log("Listening to events on:", wssUrl);
+  const provider = new ethers.WebSocketProvider(wssUrl);
+
+  const superChainERC20BriddeContract = new ethers.Contract(SuperChainERC20BridgeAddress, SuperChainEERC20BridgeAbi, provider);
+
+  superChainERC20BriddeContract.on(superChainERC20BriddeContract.getEvent("CreateTaskSendERC20"), (
+    sourceChainId,
+    token,
+    from,
+    to,
+    amount,
+    destinationChainId,
+    msgHash
+  ) => {
+    console.log("CreateTaskSendERC20 event received");
+    console.log("sourceChainId:", sourceChainId);
+
+    relayERC20(sourceChainId, token, from, to, amount, destinationChainId, msgHash);
+
+
+  });
+
+}
+
 async function sendTask(proofOfTask, data, taskDefinitionId) {
 
-  var wallet = new ethers.Wallet(privateKey);
+  var wallet = new ethers.Wallet(process.env.PRIVATE_KEY);
   var performerAddress = wallet.address;
 
   data = ethers.hexlify(ethers.toUtf8Bytes(data));
@@ -63,5 +92,6 @@ async function publishJSONToIpfs(data) {
 module.exports = {
   init,
   publishJSONToIpfs,
-  sendTask
+  sendTask,
+  listenToEvents
 }
