@@ -1,48 +1,25 @@
 import { NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
-import { Message } from "@/types/chat";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are a helpful AI assistant. We have a two-step system:
-1) You respond to the user's prompt in natural text.
-2) A separate process will parse your text to determine if there are any special UI actions (e.g., token transfers, sentiment analysis, suggestions, etc.).
-
-When you see an opportunity for user interaction (like offering choices, next steps, or confirming a transaction), clearly describe them in plain text. For instance:
-- "Would you like to proceed with transferring 100 from ETH to USDC?"
-- "Here are some suggestions: [Option A, Option B, Option C]."
-- "It sounds like you feel strongly positive about this proposal..."
-
-Do NOT return JSON or code blocks here—just normal text. Our second-step service will parse your final text to generate dynamic UI components.
-`,
-        },
-        { role: "user", content: message },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
+    const { message, sessionId } = await req.json();
+    console.log("Received message:", message);
+    console.log("WAAAS_SERVER_URL:", process.env.WAAAS_SERVER_URL);
+    const response = await fetch(`${process.env.WAAAS_SERVER_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message, sessionId }),
     });
 
-    const responseMessage: Message = {
-      id: Date.now().toString(),
-      content: completion.choices[0].message.content || "",
-      role: "assistant",
-    };
-
-    console.log("[Chat Response]", responseMessage);
-
-    return NextResponse.json(responseMessage);
+    const data = await response.json();
+    console.log("Response from server:", data);
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("[Chat Error]", error);
+    console.error("Error in chat API route:", error);
     return NextResponse.json(
-      { error: "Failed to process message" },
+      { error: "An error occurred while processing the request" },
       { status: 500 }
     );
   }

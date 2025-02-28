@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5001;
 
 app.use(express.json());
 
@@ -15,7 +15,7 @@ app.use("/chat", chatRouter);
 
 // A simple root endpoint.
 app.get("/", (req, res) => {
-  res.send("LangChain GPT-4 ReAct Agent Server is running.");
+  res.send("WAaaS Server is running.");
 });
 
 app.listen(port, () => {

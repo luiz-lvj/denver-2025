@@ -15,12 +15,23 @@ export async function processMessage(agent: any, config: any, message: string): 
       config
     );
 
+    // Track which chunks we've already seen to avoid duplicates
+    const seen = new Set<string>();
     let response = '';
+    
     for await (const chunk of stream) {
-      if ("agent" in chunk) {
-        response += chunk.agent.messages[0].content + '\n';
-      } else if ("tools" in chunk) {
-        response += chunk.tools.messages[0].content + '\n';
+      let content = '';
+      
+      if ("agent" in chunk && chunk.agent.messages.length > 0) {
+        content = chunk.agent.messages[0].content;
+      } else if ("tools" in chunk && chunk.tools.messages.length > 0) {
+        content = chunk.tools.messages[0].content;
+      }
+      
+      // Only add content if we haven't seen it before
+      if (content && !seen.has(content)) {
+        seen.add(content);
+        response += content + '\n';
       }
     }
 

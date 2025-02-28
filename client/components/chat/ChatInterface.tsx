@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { Message, MessageActions } from "@/types/chat";
 
+const sessionId = "42";
+
 export function ChatInterface() {
+  // Create a ref for the end div that we'll scroll to
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // ───────────────────────────────────────────────────────────
   // Existing chat states
@@ -15,27 +19,33 @@ export function ChatInterface() {
     {
       id: "1",
       role: "assistant",
-      content: `**Hello!** I’m your specialized assistant, ready to help with a range of tasks:
+      content: `**Hello!** I'm your AI assistant with a variety of helpful tools:
+
+**Blockchain & Tokens:**
+- **Token Balance Checks**
+  Check token balances on Ethereum, Base, and Mode networks
+  Supported tokens: DAI on Ethereum mainnet, plus custom tokens
+  Example: "What's my DAI balance on Ethereum mainnet?" or "Check token 0x123... for wallet 0xabc..."
+
+**Information Services:**
+- **Weather Information**
+  Get current weather for any location
+  Example: "What's the weather in Tokyo?"
   
-      - **General Questions**  
-        Ask me anything—from coding advice to trivia, I can offer insights and explanations.
-      
-      - **Token Transfers**  
-        Want to send tokens to someone? Just let me know the address, token type, and amount.
-      
-      - **Token Swaps**  
-        Need to swap one token for another (e.g., ETH to USDC)? I can set that up for you, too.
-      
-      - **Faucet Requests**  
-        If you need test tokens from a faucet, I can help you request the right amount and confirm the transaction.
-      
-      - **Sentiment Analysis**  
-        Curious how optimistic or pessimistic your idea might seem? I can gauge the sentiment on a scale from very negative to very positive.
-      
-      - **Suggestions & Confirmations**  
-        I’m also able to suggest follow-up actions or confirm next steps—just let me know what you’d like to do.
-      
-      What can I assist you with today?`
+- **Web Search**
+  Search the web for real-time information
+  Example: "Search for latest Ethereum news" or "Look up blockchain conferences in 2025"
+
+**Utilities:**
+- **Number Calculations**
+  Add numbers together quickly
+  Example: "What's 1538 + 2947?"
+  
+- **Secret Number**
+  Get a "secret" random number when needed
+  Example: "Give me a secret number"
+
+How can I assist you today?`
     },
   ]);
 
@@ -48,6 +58,15 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Scroll to bottom whenever messages change
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (userInput?: string) => {
     const finalInput = userInput || input;
@@ -66,12 +85,16 @@ export function ChatInterface() {
     setErrors({});
 
     try {
-      // mock response
-      const data = {
-        lastAiMessage: "Hello! How can I assist you today?",
-      };
+      // chat route
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: finalInput, sessionId }),
+      });
+      const data = await response.json();
+      console.log("Response from server:", data);
 
-      // Create a new AI message from the server’s response
+      // Create a new AI message from the server's response
       const aiMessage: Message = {
         id: Date.now().toString(),
         content: data.lastAiMessage ?? "[No AI message found]",
@@ -148,7 +171,7 @@ export function ChatInterface() {
   // Render
   // ───────────────────────────────────────────────────────────
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col bg-zinc-900">
+    <div className="flex h-full flex-col bg-zinc-900">
 
       {/* Scrollable container for messages */}
       <ScrollArea className="flex-1 px-4">
@@ -164,16 +187,17 @@ export function ChatInterface() {
                 message.role === "assistant" &&
                 message.id !== "1"
               }
-              // Adjust how you want to show loading or error states
               isLoading={false}
               error={errors[message.id]}
             />
           ))}
+          {/* This empty div serves as our scroll anchor */}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
       {/* Input area */}
-      <div className="p-4">
+      <div className="p-4 border-t border-zinc-800">
         <div className="mx-auto max-w-3xl space-y-4">
           <ChatInput
             value={input}
