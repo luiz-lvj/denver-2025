@@ -1,1 +1,2 @@
 @othentic/=lib/core-contracts/src/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
