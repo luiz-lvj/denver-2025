@@ -66,6 +66,12 @@ Instructions:
   - Common examples:
     - "Check my DAI balance on Ethereum mainnet" → Use ethereum, mainnet, DAI address, and ask for wallet
     - "What's my token balance for X on Y chain" → Ask for specific token address if not provided
+- For creating GitHub pull requests, use github_pr
+  - You'll need details like title, description, branch names, repository, file path, and content
+  - This is particularly useful for adding new tool implementations
+- For cryptocurrency operations, use coinbase_agentkit
+  - You can check prices with operation: 'check_price', get portfolio data with operation: 'get_portfolio'
+  - Execute trades with operation: 'execute_trade' or get market data with operation: 'get_market_data'
 - Be concise and helpful in your responses
 - If a tool fails, explain the issue and suggest correct format
 - Maintain conversation context using previous messages
@@ -78,7 +84,7 @@ Remember to think step-by-step about which tool to use for each request.`;
  */
 function validateEnvironment(): void {
   const missingVars: string[] = [];
-  const requiredVars = ["OPENAI_API_KEY","TAVILY_API_KEY"];
+  const requiredVars = ["OPENAI_API_KEY", "TAVILY_API_KEY"];
   
   requiredVars.forEach(varName => {
     if (!process.env[varName]) {
@@ -122,6 +128,8 @@ export async function createAgentExecutor(sessionId: string) {
     "For weather queries, use the get_weather tool. For addition, use sum_numbers. " +
     "For web search, use web_search. " +
     "For token balance queries, use get_token_balance. " +
+    "For GitHub pull requests, use github_pr. " +
+    "For cryptocurrency operations, use coinbase_agentkit. " +
     "Be concise and helpful with your responses.\n\n";
 
   // Create the React agent
