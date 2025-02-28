@@ -1,20 +1,26 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { Message, MessageActions } from "@/types/chat";
-import { useWallet } from "../../providers/WalletContext";
+import { useWalletAdapter } from "../../hooks/useWalletAdapter";
 
 const sessionId = "42";
 
 export function ChatInterface() {
-  // Access wallet context
-  const { address, selectedNetwork } = useWallet();
+  // Use the wallet adapter instead of useWallet
+  const { address, selectedNetwork } = useWalletAdapter();
   
-  // Create a ref for the end div that we'll scroll to
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Create a ref for the scroll container
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Track component mounting for hydration safety
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ───────────────────────────────────────────────────────────
   // Existing chat states
@@ -63,11 +69,19 @@ How can I assist you today?`
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Scroll to bottom whenever messages change
+  // Improved scroll to bottom function
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      // Use setTimeout to ensure the DOM has updated
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      }, 0);
+    }
   };
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -191,9 +205,16 @@ How can I assist you today?`
   // Render
   // ───────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-full bg-zinc-900">
-      {/* Scrollable container for messages */}
-      <ScrollArea className="flex-1 px-4 pb-32"> {/* Increased bottom padding to make space for fixed input */}
+    <div className="flex flex-col h-full">
+      {/* Chat Messages Container - scrollable */}
+      <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 pb-32"
+        style={{ 
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#52525B #27272A'
+        }}
+      >
         <div className="mx-auto max-w-3xl space-y-8 py-8">
           {messages.map((message) => (
             <ChatMessage
@@ -210,13 +231,13 @@ How can I assist you today?`
               error={errors[message.id]}
             />
           ))}
-          {/* This empty div serves as our scroll anchor */}
-          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Fixed input area */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800 shadow-lg z-10">
+      <div 
+        className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800 shadow-lg z-10"
+      >
         <div className="mx-auto max-w-3xl">
           <ChatInput
             value={input}
@@ -224,7 +245,8 @@ How can I assist you today?`
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />
-          {address && (
+          {/* Only show wallet info when component is mounted to prevent hydration issues */}
+          {mounted && address && (
             <div className="mt-2 text-xs text-zinc-500 flex items-center">
               <span className="mr-2">Connected:</span>
               <span className="text-blue-400">{address.substring(0, 6)}...{address.substring(address.length - 4)}</span>

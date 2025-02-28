@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import React from "react";
-import { WalletProvider } from "@/providers/WalletContext";
+import { RainbowKitProvider } from "@/providers/RainbowKitProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,15 +20,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} flex flex-col h-screen overflow-hidden`}>
-        <WalletProvider>
-          <Header />
-          <main className="flex-1 overflow-hidden relative">
-            {children}
-          </main>
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} flex flex-col h-full bg-zinc-900`}>
+        <RainbowKitProvider>
+          <div className="flex flex-col h-full">
+            <Header />
+            <main className="flex-1 h-full overflow-hidden">
+              {children}
+            </main>
+          </div>
           <Toaster />
-        </WalletProvider>
+        </RainbowKitProvider>
       </body>
     </html>
   );
