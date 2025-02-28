@@ -5,10 +5,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { Message, MessageActions } from "@/types/chat";
+import { useWallet } from "../../providers/WalletContext";
 
 const sessionId = "42";
 
 export function ChatInterface() {
+  // Access wallet context
+  const { address, selectedNetwork } = useWallet();
+  
   // Create a ref for the end div that we'll scroll to
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -68,14 +72,29 @@ How can I assist you today?`
     scrollToBottom();
   }, [messages]);
 
+  // Update session ID when wallet changes
+  useEffect(() => {
+    // If wallet is connected, use that as part of the session ID
+    // This helps maintain separate chat histories per wallet
+    if (address) {
+      console.log(`Wallet connected: ${address} on ${selectedNetwork.name}`);
+    }
+  }, [address, selectedNetwork]);
+
   const handleSubmit = async (userInput?: string) => {
     const finalInput = userInput || input;
     if (!finalInput.trim() || isLoading) return;
 
+    // Inject wallet information if connected
+    let enrichedInput = finalInput;
+    if (address && finalInput.toLowerCase().includes("balance")) {
+      // If the user is asking about balances, automatically include their address
+      enrichedInput = `${finalInput} for wallet ${address} on ${selectedNetwork.name}`;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: finalInput,
+      content: finalInput, // Show what the user actually typed
       role: "user",
     };
     const updatedMessages = [...messages, userMessage];
@@ -85,11 +104,14 @@ How can I assist you today?`
     setErrors({});
 
     try {
-      // chat route
+      // Use the enriched input for the API call but show the original input to the user
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: finalInput, sessionId }),
+        body: JSON.stringify({ 
+          message: enrichedInput, // Send enriched input to the API
+          sessionId: address ? `${sessionId}-${address.substring(2, 10)}` : sessionId // Include wallet in session ID if available
+        }),
       });
       const data = await response.json();
       console.log("Response from server:", data);
@@ -102,9 +124,7 @@ How can I assist you today?`
       };
       setMessages((prev) => [...prev, aiMessage]);
 
-      // ─────────────────────────────────────────────────────────
-      // 4. Parse the AI message with /api/parse
-      // ─────────────────────────────────────────────────────────
+      // Parse the AI message
       try {
         const parseResponse = await fetch("/api/parse", {
           method: "POST",
@@ -171,10 +191,9 @@ How can I assist you today?`
   // Render
   // ───────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full flex-col bg-zinc-900">
-
+    <div className="flex flex-col h-full bg-zinc-900">
       {/* Scrollable container for messages */}
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 pb-32"> {/* Increased bottom padding to make space for fixed input */}
         <div className="mx-auto max-w-3xl space-y-8 py-8">
           {messages.map((message) => (
             <ChatMessage
@@ -196,15 +215,26 @@ How can I assist you today?`
         </div>
       </ScrollArea>
 
-      {/* Input area */}
-      <div className="p-4 border-t border-zinc-800">
-        <div className="mx-auto max-w-3xl space-y-4">
+      {/* Fixed input area */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800 shadow-lg z-10">
+        <div className="mx-auto max-w-3xl">
           <ChatInput
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />
+          {address && (
+            <div className="mt-2 text-xs text-zinc-500 flex items-center">
+              <span className="mr-2">Connected:</span>
+              <span className="text-blue-400">{address.substring(0, 6)}...{address.substring(address.length - 4)}</span>
+              <span className="mx-2 text-zinc-600">|</span>
+              <span className="flex items-center">
+                <span className="mr-1">{selectedNetwork.icon}</span>
+                {selectedNetwork.name}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
