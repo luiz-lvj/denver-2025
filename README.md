@@ -1,41 +1,51 @@
-# Denver 2025 - Web3 AI Assistant Platform
+# Denver 2025 - WAaaS (Wallet-Agent-as-a-Service)
 
-A comprehensive Web3 platform combining AI assistant capabilities with blockchain interactions. This project integrates several components to provide an intelligent assistant that can interact with various blockchain networks and perform a range of operations.
+A revolutionary Web3 platform that seamlessly orchestrates on-chain and off-chain operations, providing unified access to decentralized ecosystems. WAaaS aggregates and interprets user data across multiple blockchains to enable complex multi-chain operations through simple natural language interactions.
 
-## 🌐 Overview
+## 🌐 Platform Overview
 
-This platform combines:
-- A conversational AI assistant with blockchain capabilities
-- Attestation and validation services for blockchain transactions
-- Custom ERC20 implementations for cross-chain functionality
-- A modern web interface with seamless wallet integration
+WAaaS combines three core components to simplify Web3 interactions:
+- **Intelligent Orchestrator**: Translates user intent into executable cross-chain workflows
+- **Autonomous Verification System (AVS)**: Ensures provable and transparent execution of multi-chain operations
+- **Unified Interface**: Natural language interaction layer powered by AI agent capabilities
 
-## 🧩 Components
+Key capabilities:
+- 🧩 Automated orchestration of complex DeFi operations across L2s
+- 🔍 Real-time asset price discovery and liquidity analysis
+- 🌉 Smart bridging recommendations based on cross-chain liquidity
+- 🔒 Secure transaction verification through Othentic's infrastructure
+- 💬 Natural language interface for complex Web3 operations
 
-### 1. 💬 WAaaS (Web3 Assistant as a Service)
-An AI-powered chat assistant built using LangChain that can:
-- Answer questions about blockchain and crypto
-- Check token balances across networks
-- Provide real-time data through web search and APIs
-- Process natural language queries into blockchain operations
+## 🧩 Core Components
 
-### 2. ✅ AVS (Attestation/Validation Service)
-A service for validating blockchain transactions that includes:
-- Validation Service for verifying transactions
-- Execution Service for processing blockchain operations
-- Prometheus and Grafana for monitoring and analytics
-- Docker-based deployment for simplified operations
+### 1. 🧠 Intelligent Orchestrator
+The brain of WAaaS that:
+- Analyzes liquidity and prices across multiple chains
+- Automates optimal execution paths for asset swaps/bridging
+- Manages cross-chain state transitions
+- Integrates with major DEXs and bridging protocols
+- Optimizes gas costs and slippage through ML models
 
-### 3. 🪙 Superchain ERC20
-A Foundry-based implementation of ERC20 tokens designed for:
-- Cross-chain compatibility
-- Superchain network deployments
-- Testing and verification capabilities
+### 2. ✅ Autonomous Verification System (AVS)
+The execution layer featuring:
+- Zero-knowledge proof verification of cross-chain operations
+- Real-time monitoring of transaction states
+- Automated rollback capabilities for failed transactions
+- Transparent audit trails for all operations
+- Secure execution through Othentic's validation network
 
-### 4. 🖥️ Client Web Interface
-A Next.js web application featuring:
-- Modern UI with responsive design
-- RainbowKit wallet integration
-- Support for multiple networks including Ethereum, Base, and Mode
-- Chat interface for interacting with the AI assistant
+### 3. 💬 Conversational Interface
+The user-facing component offering:
+- Natural language processing for complex requests
+- Unified view of cross-chain portfolios
+- Step-by-step explanation of proposed transactions
+- Predictive analytics for market movements
+- Risk assessment for DeFi operations
 
+### 4. ⛓️ Cross-Chain Infrastructure
+Supporting technologies:
+- Superchain-compatible ERC20 implementations
+- Optimized L2 <> L2 communication layers
+- Real-time liquidity indexing
+- MEV-protected transaction bundling
+- Gas abstraction for seamless cross-chain ops
