@@ -37,19 +37,9 @@ export function ChatInterface() {
   Supported tokens: DAI on Ethereum mainnet, plus custom tokens
   Example: "What's my DAI balance on Ethereum mainnet?" or "Check token 0x123... for wallet 0xabc..."
 
-**Information Services:**
-- **Weather Information**
-  Get current weather for any location
-  Example: "What's the weather in Tokyo?"
-  
 - **Web Search**
   Search the web for real-time information
   Example: "Search for latest Ethereum news" or "Look up blockchain conferences in 2025"
-
-**Utilities:**
-- **Number Calculations**
-  Add numbers together quickly
-  Example: "What's 1538 + 2947?"
   
 - **Secret Number**
   Get a "secret" random number when needed
