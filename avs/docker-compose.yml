@@ -28,7 +28,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "${L2:-amoy}",
+      "--l2-chain", "${L2:-base-sepolia}",
       "--p2p.datadir", "data/peerstore/attester1"
     ]
     environment:
@@ -51,7 +51,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "${L2:-amoy}",
+      "--l2-chain", "${L2:-base-sepolia}",
       "--p2p.datadir", "data/peerstore/attester2"
     ]
     environment:
@@ -74,7 +74,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "${L2:-amoy}",
+      "--l2-chain", "${L2:-base-sepolia}",
       "--p2p.datadir", "data/peerstore/attester3"
     ]
     environment:

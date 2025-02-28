@@ -6,6 +6,7 @@ const axios = require("axios");
 const { chains, AttestationServiceAddress } = require('./constants');
 const { SuperChainTokenBridgeAbi } = require('./abis/SuperChainTokenBridge');
 const { AttestationServiceAbi } = require('./abis/AttestationService');
+const { sendTask } = require('./dal.service');
 
 
 async function relayERC20(
@@ -53,7 +54,11 @@ async function relayERC20(
         attestersIds: [0]
       }
 
-      await submitTask(taskInfo, taskSubmissionDetails);
+      await sendTask(taskInfo.proofOfTask, taskInfo.data, taskInfo.taskDefinitionId);
+
+      
+
+      //await submitTask(taskInfo, taskSubmissionDetails);
 
       return txHash;
 
