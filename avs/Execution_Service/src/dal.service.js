@@ -16,7 +16,7 @@ function init() {
   pinataApiKey = process.env.PINATA_API_KEY;
   pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY;
   rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
-  privateKey = process.env.PRIVATE_KEY_PERFORMER;
+  privateKey = process.env.PRIVATE_KEY;
 }
 
 

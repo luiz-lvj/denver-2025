@@ -1,4 +1,3 @@
-
 "use strict";
 require('dotenv').config();
 const { ethers } = require('ethers');
@@ -6,7 +5,49 @@ const axios = require("axios");
 const { chains, AttestationServiceAddress } = require('./constants');
 const { SuperChainTokenBridgeAbi } = require('./abis/SuperChainTokenBridge');
 const { AttestationServiceAbi } = require('./abis/AttestationService');
-const { sendTask } = require('./dal.service');
+
+const bls = require('@noble/bls12-381');
+const crypto = require('crypto');
+
+
+async function getTpAndTaSignatures(message) {
+  // Create two different private keys from the main private key
+  const mainPrivateKey = process.env.PRIVATE_KEY;
+  const s1 = ethers.keccak256(ethers.toUtf8Bytes(mainPrivateKey + "TP"));
+  const s2 = ethers.keccak256(ethers.toUtf8Bytes(mainPrivateKey + "TA"));
+
+  // Create wallets for signing
+  const wallet1 = new ethers.Wallet(s1);
+  const wallet2 = new ethers.Wallet(s2);
+
+  // Sign the message with both keys
+  const tpSignature = await wallet1.signMessage(ethers.getBytes(message));
+  const taSignature = await wallet2.signMessage(ethers.getBytes(message));
+
+  // Convert taSignature to [uint256, uint256] format
+  const [taSig0, taSig1] = splitECDSASignature(taSignature);
+
+  return {
+    tpSignature: tpSignature,
+    taSignature: [taSig0, taSig1],
+  };
+}
+
+/**
+ * Splits an ECDSA signature into two 256-bit words
+ */
+function splitECDSASignature(signature) {
+  // Remove '0x' and split into r, s components (ignore v)
+  const sig = signature.slice(2);
+  const r = sig.slice(0, 64);
+  const s = sig.slice(64, 128);
+
+  // Convert to decimal strings
+  const rVal = BigInt('0x' + r).toString();
+  const sVal = BigInt('0x' + s).toString();
+
+  return [rVal, sVal];
+}
 
 
 async function relayERC20(
@@ -41,24 +82,41 @@ async function relayERC20(
       const taskInfo = {
         proofOfTask: txHash,
         data: ethers.hexlify(ethers.toUtf8Bytes("hello")),
-        taskPerformer: from,
+        taskPerformer: wallet.address,
         taskDefinitionId: 1
       }
 
       const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [taskInfo.proofOfTask, taskInfo.data, taskInfo.taskPerformer, taskInfo.taskDefinitionId]);
       const messageHash = ethers.keccak256(message);
+
+
+      //const { tpSignature, taSignature } = await getTpAndTaSignatures(message);
+
+      const tpSignature =  wallet.signingKey.sign(messageHash);
+
+      const taSignature = [tpSignature.r, tpSignature.s];
+
+      const tpSig = ethers.AbiCoder.defaultAbiCoder().encode(["string"], ["tpSignature"]);
+
+
+
+      console.log("tpSignature:", tpSignature);
+      console.log("taSignature:", taSignature);
+
+
+
       const taskSubmissionDetails = {
         isApproved: true,
-        tpSignature: wallet.signingKey.sign(messageHash).serialized,
-        taSignature: [0, 0],
-        attestersIds: [0]
+        tpSignature: tpSig,
+        taSignature: [1, 2],
+        attestersIds: [1]
       }
 
-      await sendTask(taskInfo.proofOfTask, taskInfo.data, taskInfo.taskDefinitionId);
+      //await sendTask(taskInfo.proofOfTask, taskInfo.data, taskInfo.taskDefinitionId);
 
       
 
-      //await submitTask(taskInfo, taskSubmissionDetails);
+      await submitTask(taskInfo, taskSubmissionDetails);
 
       return txHash;
 

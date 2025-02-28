@@ -11,6 +11,7 @@
   "author": "",
   "license": "BUSL-1.1",
   "dependencies": {
+    "@noble/bls12-381": "^1.4.0",
     "@pinata/sdk": "^2.1.0",
     "@types/axios": "^0.14.0",
     "axios": "^1.1.3",
