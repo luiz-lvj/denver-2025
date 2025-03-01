@@ -10,44 +10,12 @@ const bls = require('@noble/bls12-381');
 const crypto = require('crypto');
 
 
-async function getTpAndTaSignatures(message) {
-  // Create two different private keys from the main private key
-  const mainPrivateKey = process.env.PRIVATE_KEY;
-  const s1 = ethers.keccak256(ethers.toUtf8Bytes(mainPrivateKey + "TP"));
-  const s2 = ethers.keccak256(ethers.toUtf8Bytes(mainPrivateKey + "TA"));
 
-  // Create wallets for signing
-  const wallet1 = new ethers.Wallet(s1);
-  const wallet2 = new ethers.Wallet(s2);
+const  { bn254 } = require('@noble/curves/bn254');
 
-  // Sign the message with both keys
-  const tpSignature = await wallet1.signMessage(ethers.getBytes(message));
-  const taSignature = await wallet2.signMessage(ethers.getBytes(message));
+const { bls12_381 } = require('@noble/curves/bls12-381');
 
-  // Convert taSignature to [uint256, uint256] format
-  const [taSig0, taSig1] = splitECDSASignature(taSignature);
-
-  return {
-    tpSignature: tpSignature,
-    taSignature: [taSig0, taSig1],
-  };
-}
-
-/**
- * Splits an ECDSA signature into two 256-bit words
- */
-function splitECDSASignature(signature) {
-  // Remove '0x' and split into r, s components (ignore v)
-  const sig = signature.slice(2);
-  const r = sig.slice(0, 64);
-  const s = sig.slice(64, 128);
-
-  // Convert to decimal strings
-  const rVal = BigInt('0x' + r).toString();
-  const sVal = BigInt('0x' + s).toString();
-
-  return [rVal, sVal];
-}
+const bls_bn254 = require('@kevincharm/bls-bn254');
 
 
 async function relayERC20(
@@ -69,7 +37,7 @@ async function relayERC20(
 
       const tx = await tokenBridgeContract.relayERC20(token, from, to, amount);
 
-      await tx.wait();
+      //await tx.wait();
 
       console.log("Token Relayed");
 
@@ -89,31 +57,51 @@ async function relayERC20(
       const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [taskInfo.proofOfTask, taskInfo.data, taskInfo.taskPerformer, taskInfo.taskDefinitionId]);
       const messageHash = ethers.keccak256(message);
 
+      const tpSignature =  await wallet.signMessage(ethers.getBytes(messageHash));
 
-      //const { tpSignature, taSignature } = await getTpAndTaSignatures(message);
+      console.log("private key:", process.env.PRIVATE_KEY);
 
-      const tpSignature =  wallet.signingKey.sign(messageHash);
+      const signatureBytes = await bls.sign(
+        ethers.getBytes(messageHash), 
+        String(process.env.PRIVATE_KEY).replace("0x", "")
+      );
 
-      const taSignature = [tpSignature.r, tpSignature.s];
+      console.log("messageHash:", messageHash);
 
-      const tpSig = ethers.AbiCoder.defaultAbiCoder().encode(["string"], ["tpSignature"]);
+      // const sig = bls12_381.sign(String(messageHash).replace("0x", ""), String(process.env.PRIVATE_KEY).replace("0x", ""));
+
+      // const sig2 = bls12_381.ShortSignature.fromHex(ethers.hexlify(sig).replace("0x", "").slice(0,48));
+
+      // console.log("sig2:", sig2);
+
+      // const x = sig2.x.c0;
+      // const y = sig2.y.c0;
+
+      // console.log("x:", x);
+      // console.log("y:", y);
+
+      const bn254_instance = await bls_bn254.BlsBn254.create();
+
+      const g1 = bn254.G1.hashToCurve(ethers.hexlify(messageHash));
+
+      const sig3 = bn254_instance.sign(g1, process.env.PRIVATE_KEY)
+
+      console.log("sig3:", sig3);
+
+      //const a = bn254.Signature.fromHex(String(messageHash).replace("0x", ""));
 
 
 
-      console.log("tpSignature:", tpSignature);
-      console.log("taSignature:", taSignature);
 
-
+      
+      //const taSignature = splitSignatureToUint256(signatureBytes);
 
       const taskSubmissionDetails = {
         isApproved: true,
-        tpSignature: tpSig,
-        taSignature: [1, 2],
+        tpSignature: tpSignature,
+        taSignature: [x, y],
         attestersIds: [1]
       }
-
-      //await sendTask(taskInfo.proofOfTask, taskInfo.data, taskInfo.taskDefinitionId);
-
       
 
       await submitTask(taskInfo, taskSubmissionDetails);
