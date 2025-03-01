@@ -2,22 +2,23 @@
 
 import { Tool } from "@langchain/core/tools";
 import { ToolCategory, RegistryEntry, ToolMetadata } from "./types";
+import { WaaaSToolWrapper } from "../tools/WaaaSToolWrapper";
 
 export class ToolRegistry {
   private registry = new Map<string, RegistryEntry>();
 
   // Register a new tool
-  register(name: string, tool: Tool, metadata: ToolMetadata): void {
+  register(name: string, tool: Tool | WaaaSToolWrapper<any>, metadata: ToolMetadata): void {
     this.registry.set(name, { tool, metadata });
   }
 
   // Get a tool by name
-  getTool(name: string): Tool | undefined {
+  getTool(name: string): Tool | WaaaSToolWrapper<any> | undefined {
     return this.registry.get(name)?.tool;
   }
 
   // Get all tools as an array
-  getAllTools(): Tool[] {
+  getAllTools(): (Tool | WaaaSToolWrapper<any>)[] {
     return Array.from(this.registry.values()).map(entry => entry.tool);
   }
 
@@ -27,7 +28,7 @@ export class ToolRegistry {
   }
 
   // Get tools by category
-  getToolsByCategory(category: ToolCategory): Tool[] {
+  getToolsByCategory(category: ToolCategory): (Tool | WaaaSToolWrapper<any>)[] {
     return Array.from(this.registry.values())
       .filter(entry => entry.metadata.category === category)
       .map(entry => entry.tool);

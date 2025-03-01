@@ -1,4 +1,5 @@
 import { Tool } from "@langchain/core/tools";
+import { WaaaSToolWrapper } from "../tools/WaaaSToolWrapper";
 
 // Define tool categories
 export enum ToolCategory {
@@ -16,10 +17,11 @@ export interface ToolMetadata {
   description: string;
   usage: string;
   examples: string[];
+  [key: string]: unknown; // Add index signature for compatibility
 }
 
 // Registry entry that combines the tool with its metadata
 export interface RegistryEntry {
-  tool: Tool;
+  tool: Tool | WaaaSToolWrapper<any>;
   metadata: ToolMetadata;
 }

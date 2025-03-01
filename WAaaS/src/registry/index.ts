@@ -8,6 +8,7 @@ import { getTokenBalance, metadata as tokenBalanceMetadata } from "../tools/get-
 import { webSearch, metadata as webSearchMetadata } from "../tools/web-search";
 import { githubPr, metadata as githubPrMetadata } from "../tools/github-pr";
 import { coinbaseAgentkit, metadata as coinbaseAgentkitMetadata } from "../tools/coinbase-agentkit";
+import { transfer, metadata as transferMetadata } from "../tools/transfer";
 
 // Create a singleton instance
 export const toolRegistry = new ToolRegistry();
@@ -20,6 +21,7 @@ toolRegistry.register("get_token_balance", getTokenBalance, tokenBalanceMetadata
 toolRegistry.register("web_search", webSearch, webSearchMetadata);
 toolRegistry.register("github_pr", githubPr, githubPrMetadata);
 toolRegistry.register("coinbase_agentkit", coinbaseAgentkit, coinbaseAgentkitMetadata);
+toolRegistry.register("transfer", transfer, transferMetadata);
 
 // Export types and registry
 export * from "./types";

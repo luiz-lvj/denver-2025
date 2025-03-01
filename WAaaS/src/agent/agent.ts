@@ -72,6 +72,10 @@ Instructions:
 - For cryptocurrency operations, use coinbase_agentkit
   - You can check prices with operation: 'check_price', get portfolio data with operation: 'get_portfolio'
   - Execute trades with operation: 'execute_trade' or get market data with operation: 'get_market_data'
+- For token transfers between chains, use transfer
+  - You'll need the source chain, destination address, amount, and optionally token type and data
+  - Supports Ethereum, Base, Mode, Arbitrum, and Optimism networks
+  - Example: "Transfer 0.1 ETH from Ethereum to address 0x123..."
 - Be concise and helpful in your responses
 - If a tool fails, explain the issue and suggest correct format
 - Maintain conversation context using previous messages
@@ -130,6 +134,7 @@ export async function createAgentExecutor(sessionId: string) {
     "For token balance queries, use get_token_balance. " +
     "For GitHub pull requests, use github_pr. " +
     "For cryptocurrency operations, use coinbase_agentkit. " +
+    "For token transfers, use transfer. " +
     "Be concise and helpful with your responses.\n\n";
 
   // Create the React agent

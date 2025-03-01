@@ -1,35 +1,27 @@
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
 import { ToolCategory } from "../../registry/types";
+import { createWaaaSTool } from "../WaaaSToolWrapper";
+import { sumNumbersAction } from "./action";
 
-// Implement the sum numbers tool
-export const sumNumbers = tool(
-  async (input: string) => {
-    try {
-      const [num1, num2] = input.split(',').map(n => parseFloat(n.trim()));
-      if (isNaN(num1) || isNaN(num2)) {
-        return "Error: Please provide two valid numbers separated by a comma.";
-      }
-      return `The sum of ${num1} and ${num2} is ${num1 + num2}.`;
-    } catch (error) {
-      return "Error: Please provide two numbers separated by a comma (e.g., '5,3').";
-    }
-  },
-  {
-    name: "sum_numbers",
-    description: "Add two numbers together",
-    schema: z.string().describe("Two numbers separated by a comma (e.g., '5,3')"),
-  }
-);
+// Create the sum numbers tool with wrapper
+export const sumNumbers = createWaaaSTool(sumNumbersAction, {
+  category: ToolCategory.CALCULATION,
+  description: "Add two numbers together",
+  usage: "sum_numbers({ num1: number, num2: number })",
+  examples: [
+    "sum_numbers({ num1: 5, num2: 3 })",
+    "sum_numbers({ num1: 10.5, num2: 20.3 })",
+    "sum_numbers({ num1: -10, num2: 5 })"
+  ]
+});
 
-// Export metadata separately
+// Export metadata separately for compatibility with existing registry
 export const metadata = {
   category: ToolCategory.CALCULATION,
   description: "Add two numbers together",
-  usage: "sum_numbers(input: 'number1,number2')",
+  usage: "sum_numbers({ num1: number, num2: number })",
   examples: [
-    "sum_numbers('5,3')", 
-    "sum_numbers('10.5,20.3')",
-    "sum_numbers('-10,5')"
-  ],
+    "sum_numbers({ num1: 5, num2: 3 })",
+    "sum_numbers({ num1: 10.5, num2: 20.3 })",
+    "sum_numbers({ num1: -10, num2: 5 })"
+  ]
 }; 
